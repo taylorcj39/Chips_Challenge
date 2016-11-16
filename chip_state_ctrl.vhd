@@ -7,8 +7,8 @@ entity chip_state_ctrl_v1 is
 		  btnFlag : in STD_LOGIC;
 		  validFlag : in STD_LOGIC;
 		  currentL : out STD_LOGIC;
-		  nextL : out STD_LOGIC
-		  initChip : out STD_LOGIC;
+		  nextL : out STD_LOGIC;
+		  initChip : out STD_LOGIC
 	);
 end chip_state_ctrl_v1;
 
@@ -56,7 +56,7 @@ C2 : process(present_state)
 begin
 	currentL <= '0'; nextL <= '0'; initChip <= '0';
 	case present_state is 
-		when initChip =>
+		when initial =>
 			initChip <= '1';
 			currentL <= '1';
 		when btnPushed =>
