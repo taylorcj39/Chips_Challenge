@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
-entity chip_state_ctrl_v1 is 
+entity chip_state_ctrl is 
 	port( clk : in STD_LOGIC;
 		  clr : in STD_LOGIC;
 		  btnFlag : in STD_LOGIC;
@@ -10,9 +10,9 @@ entity chip_state_ctrl_v1 is
 		  nextL : out STD_LOGIC;
 		  initChip : out STD_LOGIC
 	);
-end chip_state_ctrl_v1;
+end chip_state_ctrl;
 
-architecture chip_state_ctrl_v1 of chip_state_ctrl_v1 is 
+architecture chip_state_ctrl of chip_state_ctrl is 
 type state_type is (initial, start, btnPushed, valid, currentLoad);
 signal present_state, next_state: state_type;
 begin
@@ -68,4 +68,4 @@ begin
 	end case;
 end process;
 
-end chip_state_ctrl_v1;
+end chip_state_ctrl;
