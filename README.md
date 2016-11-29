@@ -10,3 +10,15 @@ Chris Taylor
 Lawrence Arsanos
 Tyler Vanhevel
 Heather Danner
+
+Data ROM Encoding:
+Block Type	    Encoded Data Value
+  Empty	                  0
+  Wall	                  1
+  Chip	                  2
+  block	                  3
+  water	                  4
+  drowning chip	          5
+  key(collectible chip) 	6
+  gate	                  7
+  win	                    8
