@@ -33,6 +33,8 @@ begin
                 gateF <= '1';
             when "1000" =>
                 winF <= '1';
+            when others =>
+                null;
         end case;
     end if;    
     end process;    
