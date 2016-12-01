@@ -2,28 +2,39 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity move_ctrl is
-    generic (N: integer := 8);
-    Port    (currentP : in STD_LOGIC_VECTOR(N-1 downto 0);
-             dir : in STD_LOGIC_VECTOR(4 downto 0);
-             nextM : out STD_LOGIC_VECTOR(N-1 downto 0)
+    Port    (chipLoc : in STD_LOGIC_VECTOR(7 downto 0);
+             input : in STD_LOGIC_VECTOR(7 downto 0);
+             nextLoc : out STD_LOGIC_VECTOR(7 downto 0);
+             nextnextLoc : out STD_LOGIC_VECTOR(7 downto 0)
              );
 end move_ctrl;
 
+--Button Encoding
+--Left = "0"
+--Right = "1"
+--Up = "2"
+--Down = "3"
+--A/B/Start/Sel = 7:4
 architecture Behavioral of move_ctrl is
 
 begin
-process(currentP,dir)
+process(chipLoc, input)
 begin
-    if dir(4) = '1' then --Move up
-        nextM <= currentP - 4;
-    elsif dir(3) = '1' then -- Move down
-        nextM <= currentP + 4; 
-    elsif dir(2) = '1' then --Move left
-        nextM <= currentP - 1;
-    elsif dir(0) = '1' then -- Move right
-        nextM <= currentP + 1;
+    if input(0) = '1' then --Move left
+        nextLoc <= chipLoc - 1;
+        nextnextLoc <= chipLoc - 2;
+    elsif input(1) = '1' then -- Move right
+        nextLoc <= chipLoc + 1;
+        nextnextLoc <= chipLoc + 2;
+    elsif input(2) = '1' then --Move up
+        nextLoc <= chipLoc - 15;
+        nextnextLoc <= chipLoc - 30;
+    elsif input(3) = '1' then -- Move down
+        nextLoc <= chipLoc + 15;
+        nextnextLoc <= chipLoc + 30;
     else
-        null;
+        nextLoc <= X"00";
+        nextnextLoc <= X"00";
     end if;
 end process;
 

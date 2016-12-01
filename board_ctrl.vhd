@@ -162,38 +162,43 @@ architecture Behavioral of board_ctrl is
             when Water2 =>
                 wChipLoc <= '1';
                 wEmpty <= '1';
+            when game_over=>
+                --whatever happens when he dies, display "chip cant swim without flippers?"
+                null;
             --Key space is next sequence
             when chip_got_key =>
                 wNextLoc <= '1';
                 wChip <= '1';
                 keyPlus<= '1';
+            --Gate space is next sequence
+            when check_keys =>
+                null;
             --Win space is next sequence
             when Win0 =>
-                next_state <= Win1;
+                wNextLoc <= '1';
+                wChip <= '1';
             when Win1 =>
-                next_state <= Win2;
+                lookChip <= '1';
             when Win2 =>
-                next_state <= win_level;
+                wChipLoc <= '1';
+                wEmpty <= '1';
+            when win_level =>
+                --whatever happens when you win;
+                null;
             --Brick is next sequence
             when look_nextnext =>
-                next_state <= validate_nextnext;
+                lookNextnext <= '1';
             when validate_nextnext =>
-                if wallF = '1' or keyF = '1' or gateF = '1' or brickF = '1' then
-                    next_state <= wait_btn;
-                elsif emptyF = '1' then
-                    next_state <= B0;
-                elsif waterF= '1' then
-                    next_state <= Bw0;
-                else
-                    null;
-                end if;
+                validatorOn <= '1';
             --empty is nextnext sequence
             when B0 =>
-                next_state <= B1;
+                wNextnextLoc <= '1';
+                wBrick <= '1';
             when B1 =>
-                next_state <= E0;
+               lookNext <= '1';
             when Bw0 =>
-                next_state <= B1;
+               wNextnextLoc <= '1';
+               wEmpty <= '1';
     end case;
     end process;
 
