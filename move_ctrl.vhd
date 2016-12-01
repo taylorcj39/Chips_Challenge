@@ -20,16 +20,16 @@ architecture Behavioral of move_ctrl is
 begin
 process(chipLoc, input)
 begin
-    if input(0) = '1' then --Move left
+    if input = X"1" then --Move left
         nextLoc <= chipLoc - 1;
         nextnextLoc <= chipLoc - 2;
-    elsif input(1) = '1' then -- Move right
+    elsif input = X"2" then -- Move right
         nextLoc <= chipLoc + 1;
         nextnextLoc <= chipLoc + 2;
-    elsif input(2) = '1' then --Move up
+    elsif input = X"4" then --Move up
         nextLoc <= chipLoc - 15;
         nextnextLoc <= chipLoc - 30;
-    elsif input(3) = '1' then -- Move down
+    elsif input = X"8" then -- Move down
         nextLoc <= chipLoc + 15;
         nextnextLoc <= chipLoc + 30;
     else

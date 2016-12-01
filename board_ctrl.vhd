@@ -199,6 +199,8 @@ architecture Behavioral of board_ctrl is
             when Bw0 =>
                wNextnextLoc <= '1';
                wEmpty <= '1';
+            when others =>
+                null;
     end case;
     end process;
 

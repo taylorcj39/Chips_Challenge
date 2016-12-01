@@ -82,7 +82,7 @@ architecture Behavioral of board_dp is
     weA <= we;
     
     --Port Map
-    CHIPR : reg generic map(N=>32) port map (
+    CHIPR : reg generic map(N=>8) port map (
         clk => clk,
         clr => clr,
         load => chipL,
@@ -90,7 +90,7 @@ architecture Behavioral of board_dp is
         q => chipLocQ
     ); 
     
-    NEXTR : reg generic map(N=>32) port map (
+    NEXTR : reg generic map(N=>8) port map (
         clk => clk,
         clr => clr,
         load => nextL,
@@ -98,7 +98,7 @@ architecture Behavioral of board_dp is
         q => nextLocQ
     );
     
-    NNR : reg generic map(N=>32) port map (
+    NNR : reg generic map(N=>8) port map (
         clk => clk,
         clr => clr,
         load => nextnextL,
@@ -110,7 +110,7 @@ architecture Behavioral of board_dp is
         input => input,
         chipLoc=> chipLocQ,
         nextLoc => nextLocD,
-        nextnextLoc => nextLocD 
+        nextnextLoc => nextnextLocD 
      );
      
      W : writer port map (
