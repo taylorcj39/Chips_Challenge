@@ -1,41 +1,37 @@
---Is there a latch in here? output is lagging behind signal
 library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_unsigned.ALL;
-use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.STD_LOGIC_unsigned.all;
 
-entity key_counter is
-    Port ( keyPlus : in STD_LOGIC;
-           keyStart : in STD_LOGIC_VECTOR(2 downto 0);
-           clr : in STD_LOGIC;
-           clk : in STD_LOGIC;
-           remKeys : out STD_LOGIC_VECTOR(2 downto 0));
-end key_counter;
+entity KeyTracker is 
+	port( clr : in STD_LOGIC;
+		  clk : in STD_LOGIC;
+		  KeyStart : in STD_LOGIC_VECTOR(2 downto 0);
+          KeyPlus : in STD_LOGIC;
+		  RemKeys : out STD_LOGIC_VECTOR(2 downto 0)
+		);
+		
+end KeyTracker;
 
-architecture Behavioral of key_counter is
-signal keysLeft1, keysLeft2 : STD_LOGIC_VECTOR(2 downto 0);
-begin
-	process(keyStart,keyPlus,clr, clk)
+architecture KeyTracker of KeyTracker is 
+signal count : STD_LOGIC_VECTOR(2 downto 0); -- signal to hold subtracted value
+signal lock : STD_LOGIC := '0'; -- signal used to make sure the subtraction only happens once everytime KeyPlus goes high
+
+begin 
+
+	process(clr, clk)
 	begin
-        if clr = '1' then
-		    remKeys <= keyStart;
-			keysLeft1 <= keyStart;
-			keysLeft2 <= keyStart;
+		if clr = '1' then 
+			count <= KeyStart; -- set default key number back to count
+			lock <= '0'; --unlock subtractor
 		elsif clk'event and clk = '1' then
-		    if keyPlus = '1' then
-                keysLeft1 <= keysLeft1 - 1;
-                keysLeft2 <= keysLeft1;
-		    end if;
+		      if KeyPlus = '1' and lock = '0' then
+			     count <= count - 1;
+			     lock <= '1'; -- lock subtractor
+			  elsif KeyPlus = '0' and lock = '1' then
+			     lock <= '0'; -- unlock subtractor
+		      end if;
 		end if;
-		    							 
 	end process;
 	
-process()
-if keysLeft2 = keysLeft1 then
-    remKeys <= keysLeft2;
-else
-    remKeys <= keysLeft1;
-end if;
-end process();			
-end Behavioral;
-
+	RemKeys <= count; -- assign count to the output
+end KeyTracker;
