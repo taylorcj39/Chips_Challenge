@@ -8,21 +8,24 @@ entity chip_dp is
             initChip : in STD_LOGIC;
             currentL : in STD_LOGIC;
             nextL : in STD_LOGIC;
+            startValid : in STD_LOGIC;
             validFlag : out STD_LOGIC
          );
 end chip_dp;
     
 architecture Behavioral of chip_dp is
-    component dpram
-        Port ( addrA : in STD_LOGIC_VECTOR (3 downto 0);
-               addrB : in STD_LOGIC_VECTOR (3 downto 0);
-               dA : in STD_LOGIC_VECTOR (1 downto 0);
-               dB : in STD_LOGIC_VECTOR (1 downto 0);
-               weA : in STD_LOGIC;
-               weB : in STD_LOGIC;
-               qA : out STD_LOGIC_VECTOR (1 downto 0);
-               qB : out STD_LOGIC_VECTOR (1 downto 0);
-               clk : in STD_LOGIC);    
+    component test_map_ram IS
+  PORT (clka : IN STD_LOGIC;
+        wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+        addra : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        dina : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        clkb : IN STD_LOGIC;
+        web : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        dinb : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        doutb : OUT STD_LOGIC_VECTOR(1 DOWNTO 0)
+  );
     end component;
     
     component changer
@@ -45,6 +48,7 @@ architecture Behavioral of chip_dp is
         generic (N: integer := 8);
         Port    (a : in STD_LOGIC_VECTOR(N-1 downto 0);
                  b : in STD_LOGIC_VECTOR(N-1 downto 0);
+                 startValid : in STD_LOGIC;
                  valid : out STD_LOGIC);
     end component;
     
@@ -77,18 +81,18 @@ begin
     end process;
     
     --Port Map
-    RAM1 : dpram port map(
-        addrA => addrA,
-        addrB => addrB,
-        dA => qA,
-        dB => qA,
-        weA => weA,
-        weB => weB,
-        qA => qA,
-        qB => qB,
-        clk => clk   
-    );
-    
+    RAM1 : test_map_ram port map(
+        clka => clk,
+         clkb => clk, 
+         wea(0) => weA, 
+         web(0) => weB, 
+         addra => addra, 
+         addrb => addrb, 
+         dina => dA,
+         dinb => dB,
+         douta => qA,
+         doutb => qB
+         ); 
     CUR : reg generic map(N => 4)port map(
         d => current,
         load => currentL,
@@ -108,6 +112,7 @@ begin
     MV : move_validator generic map(N => 2) port map(
         a => qA,
         b => qB,
+        startValid => startValid,
         valid => valid    
     );
     

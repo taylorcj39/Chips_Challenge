@@ -13,7 +13,7 @@ entity reg is
     );
 end reg;
 
-architecture reg1 of reg is
+architecture reg of reg is
 begin
     process(clk, clr)
     begin
@@ -25,4 +25,4 @@ begin
     end if;
    end if;
  end process;
-end reg1;
+end reg;

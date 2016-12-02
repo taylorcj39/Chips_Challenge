@@ -8,12 +8,13 @@ entity chip_state_ctrl is
 		  validFlag : in STD_LOGIC;
 		  currentL : out STD_LOGIC;
 		  nextL : out STD_LOGIC;
+		  startValid : out STD_LOGIC;
 		  initChip : out STD_LOGIC
 	);
 end chip_state_ctrl;
 
 architecture chip_state_ctrl of chip_state_ctrl is 
-type state_type is (initial, start, btnPushed, valid, currentLoad);
+type state_type is (initial, start, btnPushed, valid, currentLoad,waitasec);
 signal present_state, next_state: state_type;
 begin
 
@@ -38,7 +39,9 @@ begin
 				next_state <= start;
 			end if;
 		when btnPushed =>
-			next_state <= valid;
+			next_state <= waitasec;	
+		when waitasec =>
+		    next_state <= valid;	
 		when valid =>
 			if validFlag = '1' then
 				next_state <= currentLoad;
@@ -54,13 +57,17 @@ end process;
 
 C2 : process(present_state)
 begin
-	currentL <= '0'; nextL <= '0'; initChip <= '0';
+	currentL <= '0'; nextL <= '0'; initChip <= '0'; startValid <= '0';
 	case present_state is 
 		when initial =>
-			initChip <= '1';
+            initChip <= '1';
 			currentL <= '1';
 		when btnPushed =>
 			nextL <= '1';
+		when waitasec =>
+            nextL <= '1';	
+		when valid =>
+		    startValid <= '1';	
 		when currentLoad =>
 			currentL <= '1';
 		when others =>

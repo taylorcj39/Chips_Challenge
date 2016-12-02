@@ -20,7 +20,7 @@ component board_dp
             lookChip, lookNext, lookNextnext : in STD_LOGIC;
             wChipLoc, wNextLoc, wNextnextLoc : in STD_LOGIC;
             wEmpty, wChip, wBrick, wDrown : in STD_LOGIC;
-            validatorOn, keyPlus, loadInitial : in STD_LOGIC;
+            validatorOn, keyPlus, sInitial : in STD_LOGIC;
             chipL, nextL, nextnextL : in STD_LOGIC;
             qA : in STD_LOGIC_VECTOR(3 downto 0);
             winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;
@@ -36,7 +36,7 @@ component board_ctrl
             lookChip, lookNext, lookNextnext : out STD_LOGIC;
             wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;
             wEmpty, wChip, wBrick, wDrown : out STD_LOGIC;
-            validatorOn, keyPlus, loadInitial : out STD_LOGIC;
+            validatorOn, keyPlus, sInitial : out STD_LOGIC;
             chipL, nextL, nextnextL : out STD_LOGIC
    );
 end component;
@@ -46,7 +46,7 @@ signal winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : STD_LOG
 signal lookChip, lookNext, lookNextnext : STD_LOGIC;
 signal wChipLoc, wNextLoc, wNextnextLoc : STD_LOGIC;
 signal wEmpty, wChip, wBrick, wDrown : STD_LOGIC;
-signal validatorOn, keyPlus, loadInitial : STD_LOGIC;
+signal validatorOn, keyPlus, sInitial : STD_LOGIC;
 signal chipL, nextL, nextnextL : STD_LOGIC;
 
 begin
@@ -55,10 +55,10 @@ begin
 DP : board_dp port map(
     clk => clk, clr => clr,
     input => input,
-    lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNext,
+    lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNextnext,
     wChipLoc => wChipLoc, wNextLoc => wNextLoc, wNextnextLoc => wNextnextLoc,
     wEmpty => wEmpty, wChip => wChip, wBrick => wBrick, wDrown => wDrown,
-    validatorOn => validatorOn, keyPlus => keyPlus, loadInitial => loadInitial,
+    validatorOn => validatorOn, keyPlus => keyPlus, sInitial => sInitial,
     chipL => chipL, nextL => nextL, nextnextL => nextnextL,
     qA => q,
     winF => winF, gateF => gateF, brickF => brickF, emptyF => emptyF,
@@ -68,10 +68,10 @@ DP : board_dp port map(
 
 SM : board_ctrl port map(
     clk => clk, clr => clr,
-    lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNext,
+    lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNextnext,
     wChipLoc => wChipLoc, wNextLoc => wNextLoc, wNextnextLoc => wNextnextLoc,
     wEmpty => wEmpty, wChip => wChip, wBrick => wBrick, wDrown => wDrown,
-    validatorOn => validatorOn, keyPlus => keyPlus, loadInitial => loadInitial,
+    validatorOn => validatorOn, keyPlus => keyPlus, sInitial => sInitial,
     chipL => chipL, nextL => nextL, nextnextL => nextnextL,
     winF => winF, gateF => gateF, brickF => brickF, emptyF => emptyF,
     keyF => keyF, waterF => waterF, wallF => wallF, btnF => btnF, gotKeys => gotKeys   

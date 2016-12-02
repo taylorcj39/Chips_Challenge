@@ -14,19 +14,27 @@ entity looker is
 end looker;
 
 architecture Behavioral of looker is
+signal addrSig : STD_LOGIC_VECTOR(7 downto 0);
 begin
 process(clr, lookChip, lookNext, lookNextNext, chipLoc, nextLoc, nextnextLoc)
 begin
 	if clr = '1' then
 	   addr <= X"00";
+	   addrSig <= X"00";
 	else
         if lookChip = '1' then
             addr <= chipLoc;
+            addrSig <= chipLoc;
         elsif lookNext = '1' then
             addr <= nextLoc;
+            addrSig <= nextLoc;
         elsif lookNextnext = '1' then
             addr <= nextnextLoc;
+            addrSig <= nextnextLoc;
+        else
+            addr <= addrSig;
         end if;
+        
     end if;
 end process;
 end Behavioral;
