@@ -9,7 +9,7 @@ entity board_dp is
             lookChip, lookNext, lookNextnext : in STD_LOGIC;
             wChipLoc, wNextLoc, wNextnextLoc : in STD_LOGIC;
             wEmpty, wChip, wBrick, wDrown : in STD_LOGIC;
-            validatorOn, keyPlus, loadInitial : in STD_LOGIC;
+            validatorOn, keyPlus, sInitial : in STD_LOGIC;
             chipL, nextL, nextnextL : in STD_LOGIC;
             qA : in STD_LOGIC_VECTOR(3 downto 0);
             winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;
@@ -32,18 +32,28 @@ architecture Behavioral of board_dp is
     end component;
     
     component move_ctrl is
-        Port    (chipLoc : in STD_LOGIC_VECTOR(7 downto 0);
-                 input : in STD_LOGIC_VECTOR(7 downto 0);
-                 nextLoc : out STD_LOGIC_VECTOR(7 downto 0);
-                 nextnextLoc : out STD_LOGIC_VECTOR(7 downto 0)
-                 );
+        Port (  clr : in STD_LOGIC;
+                chipLoc : in STD_LOGIC_VECTOR(7 downto 0);
+                input : in STD_LOGIC_VECTOR(7 downto 0);
+                nextLoc : out STD_LOGIC_VECTOR(7 downto 0);
+                nextnextLoc : out STD_LOGIC_VECTOR(7 downto 0)
+              );
+    end component;
+    
+    component key_counter
+        port( clr : in STD_LOGIC;
+              clk : in STD_LOGIC;
+              keyStart : in STD_LOGIC_VECTOR(2 downto 0);
+              keyPlus : in STD_LOGIC;
+              remKeys : out STD_LOGIC_VECTOR(2 downto 0)
+        );
     end component;
     
     component looker is
     Port ( chipLoc, nextLoc, nextnextLoc : in STD_LOGIC_VECTOR(7 downto 0); --Corresponds to address help in registers
-               lookChip, lookNext, lookNextnext : in STD_LOGIC; --Which address will be looked at
-               addr : out STD_LOGIC_VECTOR(7 downto 0);
-               clr : in STD_LOGIC); --Address output to RAM
+           lookChip, lookNext, lookNextnext : in STD_LOGIC; --Which address will be looked at
+           addr : out STD_LOGIC_VECTOR(7 downto 0);
+           clr : in STD_LOGIC); --Address output to RAM
     end component;
 
     component validator is
@@ -61,24 +71,20 @@ architecture Behavioral of board_dp is
            we : out STD_LOGIC);
     end component;
     
-    --Key counter component
-    --component key_counter is
-    
-    --end component;
-    
     --Intermediate signal assignments
     signal chipLocD, nextLocD, nextnextLocD : STD_LOGIC_VECTOR(7 downto 0); --inputs of address holding regs
     signal chipLocQ, nextLocQ, nextnextLocQ : STD_LOGIC_VECTOR(7 downto 0); --outputs of address holding regs
     signal writerAddr, lookerAddr : STD_LOGIC_VECTOR(7 downto 0);
-    signal sAddr, sInitial, we : STD_LOGIC; --select signals for internal Mux processes
+    signal sAddr, we : STD_LOGIC; --select signals for internal Mux processes
     signal keyStart, remKeys : STD_LOGIC_VECTOR(2 downto 0);
     
     begin
     --signal assignments
     gotKeys <= '1' when remKeys = "000" else '0';
-    --sAddr <= weA;
-    addrA <= lookerAddr when sAddr = '1' else writerAddr; 
-    chipLocD <= X"CC" when sInitial = '1' else nextLocQ;
+    sAddr <= we;
+    addrA <= lookerAddr when sAddr = '0' else writerAddr; 
+    chipLocD <= X"70" when sInitial = '1' else nextLocQ;
+    btnF <= '0' when input = X"0" else '1';
     weA <= we;
     
     --Port Map
@@ -107,6 +113,7 @@ architecture Behavioral of board_dp is
      );
      
      MOVER : move_ctrl port map (
+        clr => clr,
         input => input,
         chipLoc=> chipLocQ,
         nextLoc => nextLocD,
@@ -140,4 +147,12 @@ architecture Behavioral of board_dp is
         addr => lookerAddr
     );
 
+    KC : key_counter port map (
+        clr => clr,
+        clk => clk,
+        keyStart => "111",
+        keyPLus => keyPlus,
+        remKeys => remKeys    
+    );
+    
 end Behavioral;

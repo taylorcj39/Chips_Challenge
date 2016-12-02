@@ -8,13 +8,13 @@ entity board_ctrl is
             lookChip, lookNext, lookNextnext : out STD_LOGIC;
             wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;
             wEmpty, wChip, wBrick, wDrown : out STD_LOGIC;
-            validatorOn, keyPlus, loadInitial : out STD_LOGIC;
+            validatorOn, keyPlus, sInitial : out STD_LOGIC;
             chipL, nextL, nextnextL : out STD_LOGIC
     );
 end board_ctrl;
 
 architecture Behavioral of board_ctrl is
-    type state_type is (Initialize, wait_btn, load_addrs, look_next,
+    type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next,
                         validate_next, E0, E1, E2, E3, Water0, Water1, Water2, 
                         chip_got_key, check_keys, Win0, Win1, Win2, win_level, game_over,
                         look_nextnext, validate_nextnext, B0, B1, Bw0); 
@@ -38,9 +38,15 @@ architecture Behavioral of board_ctrl is
                 next_state <= wait_btn;
             when wait_btn =>
                 if btnF = '1' then
-                    next_state <= load_addrs;
+                    next_state <= wait_no_btn;
                 else
                     next_state <= wait_btn;
+                end if;
+            when wait_no_btn =>
+                if btnF = '1' then
+                    next_state <= wait_no_btn;
+                else
+                    next_state <= load_addrs;
                 end if;
             when load_addrs =>
                 next_state <= look_next;
@@ -122,17 +128,18 @@ architecture Behavioral of board_ctrl is
     end case;
     end process;
 
-    C2 : process(current_state, winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF) 
+    C2 : process(current_state) 
     begin
         --set outputs to 0
         lookChip <= '0'; lookNext <= '0'; lookNextnext <= '0';
+        wChipLoc <= '0'; wNextLoc <= '0'; wNextnextLoc <= '0';
         wEmpty <= '0'; wChip <= '0'; wBrick <= '0'; wDrown <= '0';
-        validatorOn <= '0'; loadInitial <= '0'; keyPlus <= '0';
+        validatorOn <= '0'; sInitial <= '0'; keyPlus <= '0';
         chipL <= '0'; nextL <= '0'; nextnextL <= '0';
         case current_state is
             when Initialize =>
                 --look for problems with initial, might have to make 2 states here
-                loadInitial <= '1';
+                sInitial <= '1';
                 chipL <= '1';
             --when wait_btn =>   
             when load_addrs =>
