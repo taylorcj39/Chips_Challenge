@@ -18,7 +18,7 @@ end board_ctrl;
 architecture Behavioral of board_ctrl is
     --Possible states of game logic flow
     type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next, wait_next,
-                        validate_next, E0, E1, wait_E1, E2, E3, Water0, Water1, wait_water1, Water2, 
+                        validate_next, E0, wait_E0, E1, wait_E1, E2, wait_E2, E3, Water0, Water1, wait_water1, Water2, 
                         chip_got_key, check_keys, Win0, Win1, wait_win1, Win2, win_level, game_over,
                         look_nextnext, wait_nextnext, validate_nextnext, B0, B1, wait_B1, Bw0); 
     
@@ -85,12 +85,16 @@ architecture Behavioral of board_ctrl is
                 end if;
             --Empty space is next sequence    
             when E0 =>
+                next_state <= wait_E0;
+            when wait_E0 =>
                 next_state <= E1;
             when E1 =>
                 next_state <= wait_E1;
             when wait_E1 =>                 --Waits additional clock cycle for latency of RAM
                 next_state <= E2;
             when E2 =>
+                next_state <= wait_E2;
+            when wait_E2 =>    
                 next_state <= E3;
             when E3 =>
                 next_state <= wait_btn;
@@ -175,9 +179,15 @@ architecture Behavioral of board_ctrl is
             when E0 =>              --Write chip object to next location
                 wNextLoc <= '1';
                 wChip <= '1';
+            when wait_E0 =>         --Write Chip object to next location
+                wNextLoc <= '1';
+                wChip <= '1';
             when E1 =>              --Look at chip location
                 lookChip <= '1';
             when E2 =>              --Write empty object to Chip's location
+                wChipLoc <= '1';
+                wEmpty <= '1';
+            when wait_E2=>
                 wChipLoc <= '1';
                 wEmpty <= '1';
             when E3 =>              --Load Chip's location
