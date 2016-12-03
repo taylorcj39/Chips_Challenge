@@ -18,9 +18,10 @@ end board_ctrl;
 architecture Behavioral of board_ctrl is
     --Possible states of game logic flow
     type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next, wait_next,
-                        validate_next, E0, wait_E0, E1, wait_E1, E2, wait_E2, E3, Water0, Water1, wait_water1, Water2, 
-                        chip_got_key, check_keys, Win0, Win1, wait_win1, Win2, win_level, game_over,
-                        look_nextnext, wait_nextnext, validate_nextnext, B0, B1, wait_B1, Bw0); 
+                        validate_next, E0, wait_E0, E1, wait_E1, E2, wait_E2, E3, 
+                        Water0, wait_water0, Water1, wait_water1, Water2, wait_water2,
+                        chip_got_key, check_keys, Win0, wait_win0, Win1, wait_win1, Win2, wait_win2, win_level, game_over,
+                        look_nextnext, wait_nextnext, validate_nextnext, B0, wait_B0, B1, wait_B1, Bw0, wait_Bw0); 
     
     signal current_state, next_state : state_type;
     --signal holdon : STD_LOGIC_VECTOR(1 downto 0);
@@ -100,13 +101,20 @@ architecture Behavioral of board_ctrl is
                 next_state <= wait_btn;
             --Water space is next sequence
             when Water0 =>
+                next_state <= wait_water0;
+            when wait_water0 =>
                 next_state <= Water1;
             when Water1 =>
                  next_state <= wait_water1;
             when wait_water1 =>             --Waits additional clock cycle for latency of RAM
                 next_state <= Water2;
             when Water2 =>
+                next_state <= wait_water2;
+            when wait_water2 =>
                  next_state <= game_over;
+            --Chip has drowned, game over dude
+            when game_over =>
+                next_state <= game_over;
             --Key space is next sequence
             when chip_got_key =>
                 next_state <= E1;
@@ -119,12 +127,19 @@ architecture Behavioral of board_ctrl is
                 end if;
             --Win space is next sequence
             when Win0 =>
-                next_state <= Win1;
+                next_state <= wait_water0;
+            when wait_win0 =>
+                next_state <= win1;
             when Win1 =>
                 next_state <= wait_win1;
             when wait_win1 =>               --Waits additional clock cycle for latency of RAM
                 next_state <= Win2;
             when Win2 =>
+                next_state <= wait_win2;
+            when wait_win2 =>
+                next_state <= win_level;
+            --All chip keys have been collected and chip has reached the win block, congrats!
+            when win_level =>
                 next_state <= win_level;
             --Block is next sequence
             when look_nextnext =>
@@ -143,12 +158,16 @@ architecture Behavioral of board_ctrl is
                 end if;
             --empty is nextnext sequence
             when B0 =>
+                next_state <= wait_B0;
+            when wait_B0 =>
                 next_state <= B1;
             when B1 =>
                 next_state <= wait_B1;
             when wait_B1 =>             --Waits additional clock cycle for latency of RAM
                 next_state <= E0;
             when Bw0 =>
+                next_state <= wait_Bw0;
+            when wait_Bw0 =>
                 next_state <= B1;
             when others =>
                 null;
@@ -196,9 +215,15 @@ architecture Behavioral of board_ctrl is
             when Water0 =>          --Write drowning object to next location
                 wNextLoc <= '1';
                 wDrown <= '1';
+             when wait_water0 =>          --Write drowning object to next location
+                wNextLoc <= '1';
+                wDrown <= '1';
             when Water1 =>          --Look at Chip's location
                 lookChip <= '1';
             when Water2 =>          --Write empty to Chip's location
+                wChipLoc <= '1';
+                wEmpty <= '1';
+            when wait_water2 =>          --Write empty to Chip's location
                 wChipLoc <= '1';
                 wEmpty <= '1';
             when game_over=>        --Game over, display losing screen
@@ -216,9 +241,15 @@ architecture Behavioral of board_ctrl is
             when Win0 =>            --Write chip to next location
                 wNextLoc <= '1';
                 wChip <= '1';
+            when wait_win0 =>            --Write chip to next location
+                wNextLoc <= '1';
+                wChip <= '1';
             when Win1 =>            --Look at Chip's location
                 lookChip <= '1';
             when Win2 =>            --Write empty to Chip's location
+                wChipLoc <= '1';
+                wEmpty <= '1';
+             when wait_win2 =>            --Write empty to Chip's location
                 wChipLoc <= '1';
                 wEmpty <= '1';
             when win_level =>       --Level is complete
@@ -233,11 +264,17 @@ architecture Behavioral of board_ctrl is
             when B0 =>                  --Write block to nextnext
                 wNextnextLoc <= '1';
                 wBlock <= '1';
+            when wait_B0 =>                  --Write block to nextnext
+                wNextnextLoc <= '1';
+                wBlock <= '1';
             when B1 =>                  --Look at next location
-               lookNext <= '1';
+                lookNext <= '1';
             when Bw0 =>                 --Write empty to nextnext location (For pushing blocks into water)
-               wNextnextLoc <= '1';     
-               wEmpty <= '1';
+                wNextnextLoc <= '1';     
+                wEmpty <= '1';
+            when wait_Bw0 =>                 --Write empty to nextnext location (For pushing blocks into water)
+                wNextnextLoc <= '1';     
+                wEmpty <= '1';
             when others =>
                 null;
     end case;
