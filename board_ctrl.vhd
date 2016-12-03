@@ -127,7 +127,7 @@ architecture Behavioral of board_ctrl is
                 end if;
             --Win space is next sequence
             when Win0 =>
-                next_state <= wait_water0;
+                next_state <= wait_win0;
             when wait_win0 =>
                 next_state <= win1;
             when Win1 =>
@@ -147,7 +147,7 @@ architecture Behavioral of board_ctrl is
             when wait_nextnext =>            --Waits additional clock cycle for latency of RAM
                 next_state <= validate_nextnext;
             when validate_nextnext =>
-                if wallF = '1' or keyF = '1' or gateF = '1' or blockF = '1' then
+                if wallF = '1' or keyF = '1' or gateF = '1' or blockF = '1' or winF = '1' then
                     next_state <= wait_btn;
                 elsif emptyF = '1' then
                     next_state <= B0;
@@ -215,7 +215,7 @@ architecture Behavioral of board_ctrl is
             when Water0 =>          --Write drowning object to next location
                 wNextLoc <= '1';
                 wDrown <= '1';
-             when wait_water0 =>          --Write drowning object to next location
+            when wait_water0 =>          --Write drowning object to next location
                 wNextLoc <= '1';
                 wDrown <= '1';
             when Water1 =>          --Look at Chip's location
@@ -264,7 +264,7 @@ architecture Behavioral of board_ctrl is
             when B0 =>                  --Write block to nextnext
                 wNextnextLoc <= '1';
                 wBlock <= '1';
-            when wait_B0 =>                  --Write block to nextnext
+            when wait_B0 =>             --Write block to nextnext
                 wNextnextLoc <= '1';
                 wBlock <= '1';
             when B1 =>                  --Look at next location
