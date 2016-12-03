@@ -17,10 +17,10 @@ end board_ctrl;
 
 architecture Behavioral of board_ctrl is
     --Possible states of game logic flow
-    type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next,
-                        validate_next, E0, E1, E2, E3, Water0, Water1, Water2, 
-                        chip_got_key, check_keys, Win0, Win1, Win2, win_level, game_over,
-                        look_nextnext, validate_nextnext, B0, B1, Bw0); 
+    type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next, wait_next,
+                        validate_next, E0, E1, wait_E1, E2, E3, Water0, Water1, wait_water1, Water2, 
+                        chip_got_key, check_keys, Win0, Win1, wait_win1, Win2, win_level, game_over,
+                        look_nextnext, wait_nextnext, validate_nextnext, B0, B1, wait_B1, Bw0); 
     
     signal current_state, next_state : state_type;
     --signal holdon : STD_LOGIC_VECTOR(1 downto 0);
@@ -62,6 +62,8 @@ architecture Behavioral of board_ctrl is
             when load_addrs =>                  
                 next_state <= look_next;
             when look_next =>
+                next_state <= wait_next;
+            when wait_next =>                   --Waits additional clock cycle for latency of RAM
                 next_state <= validate_next;
             when validate_next =>               --Goes to appropriate state based on what object is at next location               
                 if wallF = '1' then
@@ -85,6 +87,8 @@ architecture Behavioral of board_ctrl is
             when E0 =>
                 next_state <= E1;
             when E1 =>
+                next_state <= wait_E1;
+            when wait_E1 =>                 --Waits additional clock cycle for latency of RAM
                 next_state <= E2;
             when E2 =>
                 next_state <= E3;
@@ -94,7 +98,9 @@ architecture Behavioral of board_ctrl is
             when Water0 =>
                 next_state <= Water1;
             when Water1 =>
-                 next_state <= Water2;
+                 next_state <= wait_water1;
+            when wait_water1 =>             --Waits additional clock cycle for latency of RAM
+                next_state <= Water2;
             when Water2 =>
                  next_state <= game_over;
             --Key space is next sequence
@@ -111,11 +117,15 @@ architecture Behavioral of board_ctrl is
             when Win0 =>
                 next_state <= Win1;
             when Win1 =>
+                next_state <= wait_win1;
+            when wait_win1 =>               --Waits additional clock cycle for latency of RAM
                 next_state <= Win2;
             when Win2 =>
                 next_state <= win_level;
             --Block is next sequence
             when look_nextnext =>
+                next_state <= wait_nextnext;
+            when wait_nextnext =>            --Waits additional clock cycle for latency of RAM
                 next_state <= validate_nextnext;
             when validate_nextnext =>
                 if wallF = '1' or keyF = '1' or gateF = '1' or blockF = '1' then
@@ -131,6 +141,8 @@ architecture Behavioral of board_ctrl is
             when B0 =>
                 next_state <= B1;
             when B1 =>
+                next_state <= wait_B1;
+            when wait_B1 =>             --Waits additional clock cycle for latency of RAM
                 next_state <= E0;
             when Bw0 =>
                 next_state <= B1;

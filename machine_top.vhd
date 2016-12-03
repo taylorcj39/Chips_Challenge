@@ -59,7 +59,7 @@ RAM : level1_ram port map (
     
 MCHN : game_machine port map (
     input => input,
-    clk => clk13M,
+    clk => clk,
     clr => clr,
     q => q,
     addr => addr,
