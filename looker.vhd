@@ -1,6 +1,4 @@
---Is there a latch in here?
---what about condition when 2 drivers are high?
---not clearing properly
+--Assigns Address to be specific value based on input flags
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_unsigned.ALL;
@@ -8,21 +6,22 @@ use IEEE.STD_LOGIC_arith.ALL;
 
 entity looker is
     Port ( chipLoc, nextLoc, nextnextLoc : in STD_LOGIC_VECTOR(7 downto 0); --Corresponds to address help in registers
-           lookChip, lookNext, lookNextnext : in STD_LOGIC; --Which address will be looked at
-           addr : out STD_LOGIC_VECTOR(7 downto 0);
-           clr : in STD_LOGIC); --Address output to RAM
+           lookChip, lookNext, lookNextnext : in STD_LOGIC;                 --Which address will be looked at
+           addr : out STD_LOGIC_VECTOR(7 downto 0);                         --Address output to RAM
+           clr : in STD_LOGIC);                                             
 end looker;
 
 architecture Behavioral of looker is
-signal addrSig : STD_LOGIC_VECTOR(7 downto 0);
+
+signal addrSig : STD_LOGIC_VECTOR(7 downto 0);  --Internal signal which output will be latched to
 begin
 process(clr, lookChip, lookNext, lookNextNext, chipLoc, nextLoc, nextnextLoc)
 begin
-	if clr = '1' then
+	if clr = '1' then              --Output and signals will be '0' when clr is high
 	   addr <= X"00";
 	   addrSig <= X"00";
 	else
-        if lookChip = '1' then
+        if lookChip = '1' then      --Output is assigned the address of whatever flag is high
             addr <= chipLoc;
             addrSig <= chipLoc;
         elsif lookNext = '1' then

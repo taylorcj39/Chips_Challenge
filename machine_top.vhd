@@ -10,6 +10,8 @@ end machine_top;
 
 architecture Behavioral of machine_top is
 
+--Component Declerations-----------------------------------------
+--Game Machine component
 component game_machine is
     Port (  input : in STD_LOGIC_VECTOR(7 downto 0);
             clk, clr : in STD_LOGIC;
@@ -19,6 +21,7 @@ component game_machine is
             we : out STD_LOGIC
      );
 end component;
+
 
 component level1_ram is
     PORT (
@@ -33,7 +36,7 @@ end component;
 component clk_div is
 Port ( mclk : in STD_LOGIC;
        clr : in STD_LOGIC;
-       clk50M : out STD_LOGIC
+       clk13M : out STD_LOGIC
      );
 end component;
 
@@ -41,7 +44,7 @@ end component;
 signal addr : STD_LOGIC_VECTOR(7 downto 0);
 signal d, q : STD_LOGIC_VECTOR(3 downto 0);
 signal we : STD_LOGIC_VECTOR(0 downto 0);
-signal clk50M : STD_LOGIC;
+signal clk13M : STD_LOGIC;
 
 begin
 
@@ -56,7 +59,7 @@ RAM : level1_ram port map (
     
 MCHN : game_machine port map (
     input => input,
-    clk => clk50M,
+    clk => clk13M,
     clr => clr,
     q => q,
     addr => addr,
@@ -67,7 +70,7 @@ MCHN : game_machine port map (
 CD : clk_div port map (
     mclk => clk,
     clr => clr,
-    clk50M => clk50M
+    clk13M => clk13M
 );
 
 end Behavioral;
