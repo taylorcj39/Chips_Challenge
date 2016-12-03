@@ -3,77 +3,83 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity game_machine is
-Port (  input : in STD_LOGIC_VECTOR(7 downto 0);
-        clk, clr : in STD_LOGIC;
-        q : in STD_LOGIC_VECTOR(3 downto 0);
-        addr : out STD_LOGIC_VECTOR(7 downto 0);
-        d : out STD_LOGIC_VECTOR(3 downto 0);
-        we : out STD_LOGIC
+Port (  input : in STD_LOGIC_VECTOR(7 downto 0);    --Inputs from buttons
+        clk, clr : in STD_LOGIC;      
+        q : in STD_LOGIC_VECTOR(3 downto 0);        --Data from the RAM
+        addr : out STD_LOGIC_VECTOR(7 downto 0);    --Address in RAM to be looked at
+        d : out STD_LOGIC_VECTOR(3 downto 0);       --Data begin written to RAM
+        we : out STD_LOGIC                          --Enables writing to RAM
      );
 end game_machine;
 
 architecture Behavioral of game_machine is
 
+--Component Definitions----------------------------------------------------------------
+
+--Datapath component for game logic--------------------------------------------------------
 component board_dp
     Port(   clk, clr : in STD_LOGIC;
-            input : in STD_LOGIC_VECTOR(7 downto 0);
-            lookChip, lookNext, lookNextnext : in STD_LOGIC;
-            wChipLoc, wNextLoc, wNextnextLoc : in STD_LOGIC;
-            wEmpty, wChip, wBrick, wDrown : in STD_LOGIC;
-            validatorOn, keyPlus, sInitial : in STD_LOGIC;
-            chipL, nextL, nextnextL : in STD_LOGIC;
-            qA : in STD_LOGIC_VECTOR(3 downto 0);
-            winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;
-            weA : out STD_LOGIC;
-            dA : out STD_LOGIC_VECTOR(3 downto 0);
-            addrA : out STD_LOGIC_VECTOR(7 downto 0)
+            input : in STD_LOGIC_VECTOR(7 downto 0);                    --Inputs from buttons
+            lookChip, lookNext, lookNextnext : in STD_LOGIC;            --Which location will be looked at by looker component
+            wChipLoc, wNextLoc, wNextnextLoc : in STD_LOGIC;            --Which location will be written by writer
+            wEmpty, wChip, wBlock, wDrown : in STD_LOGIC;               --Which object will be written to RAM                        
+            validatorOn, keyPlus, sInitial : in STD_LOGIC;              --Enable for validator component, key counter flag, load for setting chip's initial location
+            chipL, nextL, nextnextL : in STD_LOGIC;                     --Load signals for registers holding board locations
+            q : in STD_LOGIC_VECTOR(3 downto 0);                        --Data being read from RAM
+            winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;    --Flags depending on what object is present at current location
+            we : out STD_LOGIC;                                         --Address in RAM to be looked at 
+            d : out STD_LOGIC_VECTOR(3 downto 0);                       --Data begin written to RAM      
+            addr : out STD_LOGIC_VECTOR(7 downto 0)                     --Enables writing to RAM         
         );
 end component;
 
+--Statemachine which handles control flow of game logic----------------------------------------
 component board_ctrl
-     Port ( winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : in STD_LOGIC;
+     Port ( winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : in STD_LOGIC; --Flags depending on what object is present at current location
             clk, clr : in STD_LOGIC;
-            lookChip, lookNext, lookNextnext : out STD_LOGIC;
-            wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;
-            wEmpty, wChip, wBrick, wDrown : out STD_LOGIC;
-            validatorOn, keyPlus, sInitial : out STD_LOGIC;
-            chipL, nextL, nextnextL : out STD_LOGIC
+            lookChip, lookNext, lookNextnext : out STD_LOGIC;           --Which location will be looked at by looker component
+            wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;           --Which location will be written by writer
+            wEmpty, wChip, wBlock, wDrown : out STD_LOGIC;              --Which object will be written to RAM    
+            validatorOn, keyPlus, sInitial : out STD_LOGIC;             --Enable for validator component, key counter flag, load for setting chip's initial location
+            chipL, nextL, nextnextL : out STD_LOGIC                     --Load signals for registers holding board locations
    );
 end component;
 
 --signal assignments
-signal winF, gateF, brickF, emptyF, keyF, waterF, wallF, btnF, gotKeys : STD_LOGIC;
-signal lookChip, lookNext, lookNextnext : STD_LOGIC;
-signal wChipLoc, wNextLoc, wNextnextLoc : STD_LOGIC;
-signal wEmpty, wChip, wBrick, wDrown : STD_LOGIC;
-signal validatorOn, keyPlus, sInitial : STD_LOGIC;
-signal chipL, nextL, nextnextL : STD_LOGIC;
+signal winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : STD_LOGIC; --Flags depending on what object is present at current location
+signal lookChip, lookNext, lookNextnext : STD_LOGIC;                                --Which location will be looked at by looker component
+signal wChipLoc, wNextLoc, wNextnextLoc : STD_LOGIC;                                --Which location will be written by writer
+signal wEmpty, wChip, wBlock, wDrown : STD_LOGIC;                                   --Which object will be written to RAM
+signal validatorOn, keyPlus, sInitial : STD_LOGIC;                                  --Enable for validator component, key counter flag, load for setting chip's initial location
+signal chipL, nextL, nextnextL : STD_LOGIC;                                         --Load signals for registers holding board locations
 
 begin
 
---Port map
+--Port map-------------------------------------------------------------------------------------------
+--Datapath component
 DP : board_dp port map(
     clk => clk, clr => clr,
     input => input,
     lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNextnext,
     wChipLoc => wChipLoc, wNextLoc => wNextLoc, wNextnextLoc => wNextnextLoc,
-    wEmpty => wEmpty, wChip => wChip, wBrick => wBrick, wDrown => wDrown,
+    wEmpty => wEmpty, wChip => wChip, wBlock => wBlock, wDrown => wDrown,
     validatorOn => validatorOn, keyPlus => keyPlus, sInitial => sInitial,
     chipL => chipL, nextL => nextL, nextnextL => nextnextL,
-    qA => q,
-    winF => winF, gateF => gateF, brickF => brickF, emptyF => emptyF,
+    q => q,
+    winF => winF, gateF => gateF, blockF => blockF, emptyF => emptyF,
     keyF => keyF, waterF => waterF, wallF => wallF, btnF => btnF, gotKeys => gotKeys,
-    weA => we, dA => d, addrA => addr     
+    we => we, d => d, addr => addr     
 );
 
+--State machine component
 SM : board_ctrl port map(
     clk => clk, clr => clr,
     lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNextnext,
     wChipLoc => wChipLoc, wNextLoc => wNextLoc, wNextnextLoc => wNextnextLoc,
-    wEmpty => wEmpty, wChip => wChip, wBrick => wBrick, wDrown => wDrown,
+    wEmpty => wEmpty, wChip => wChip, wBlock => wBlock, wDrown => wDrown,
     validatorOn => validatorOn, keyPlus => keyPlus, sInitial => sInitial,
     chipL => chipL, nextL => nextL, nextnextL => nextnextL,
-    winF => winF, gateF => gateF, brickF => brickF, emptyF => emptyF,
+    winF => winF, gateF => gateF, blockF => blockF, emptyF => emptyF,
     keyF => keyF, waterF => waterF, wallF => wallF, btnF => btnF, gotKeys => gotKeys   
 );
 end Behavioral;
