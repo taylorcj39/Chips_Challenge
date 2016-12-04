@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity game_machine is
 Port (  input : in STD_LOGIC_VECTOR(7 downto 0);    --Inputs from buttons
+        ready : in STD_LOGIC;
         clk, clr : in STD_LOGIC;      
         q : in STD_LOGIC_VECTOR(3 downto 0);        --Data from the RAM
         addr : out STD_LOGIC_VECTOR(7 downto 0);    --Address in RAM to be looked at
@@ -39,6 +40,7 @@ end component;
 component board_ctrl
      Port ( winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : in STD_LOGIC; --Flags depending on what object is present at current location
             clk, clr : in STD_LOGIC;
+            ready : in STD_LOGIC;                                       --Wait flag for when RAM is being rewritten
             lookChip, lookNext, lookNextnext : out STD_LOGIC;           --Which location will be looked at by looker component
             wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;           --Which location will be written by writer
             wEmpty, wChip, wBlock, wDrown : out STD_LOGIC;              --Which object will be written to RAM    
@@ -75,7 +77,7 @@ DP : board_dp port map(
 
 --State machine component
 SM : board_ctrl port map(
-    clk => clk, clr => clr,
+    clk => clk, clr => clr, ready => ready,
     lookchip => lookChip, lookNext => lookNext, lookNextnext => lookNextnext,
     wChipLoc => wChipLoc, wNextLoc => wNextLoc, wNextnextLoc => wNextnextLoc,
     wEmpty => wEmpty, wChip => wChip, wBlock => wBlock, wDrown => wDrown,

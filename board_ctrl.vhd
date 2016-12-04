@@ -6,6 +6,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity board_ctrl is
     Port (  winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : in STD_LOGIC; --Flags depending on what object is present at current location
             clk, clr : in STD_LOGIC;
+            ready : in STD_LOGIC;                                       --Input signifying RAM has been successfully loaded
             lookChip, lookNext, lookNextnext : out STD_LOGIC;           --Which location will be looked at by looker component
             wChipLoc, wNextLoc, wNextnextLoc : out STD_LOGIC;           --Which location will be written by writer
             wEmpty, wChip, wBlock, wDrown : out STD_LOGIC;              --Which object will be written to RAM    
@@ -17,7 +18,7 @@ end board_ctrl;
 
 architecture Behavioral of board_ctrl is
     --Possible states of game logic flow
-    type state_type is (Initialize, wait_btn, wait_no_btn, load_addrs, look_next, wait_nextA, wait_nextB,
+    type state_type is (wait_ready, Initialize, wait_btn, wait_no_btn, load_addrs, look_next, wait_nextA, wait_nextB,
                         validate_next, E0, wait_E0, E1, wait_E1A, wait_E1B, E2, wait_E2, E3, 
                         Water0, wait_water0, Water1, wait_water1A, wait_water1B, Water2, wait_water2,
                         chip_got_key, check_keys, Win0, wait_win0, Win1, wait_win1A, wait_win1B, Win2, wait_win2, win_level, game_over,
@@ -32,20 +33,21 @@ architecture Behavioral of board_ctrl is
     begin
         if clr = '1' then
             current_state <= Initialize;
-            --holdon <= "00";
         elsif clk'event and clk = '1' then
-            --holdon <= holdon + 1;
-            --if holdon = "11" then 
                 current_state <= next_state;
-                --holdon <= "00";
-            --end if;
         end if;
     end process;
     
     --Process controlling conditional flow
-    C1 : process(current_state, winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys) 
+    C1 : process(current_state, ready, winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys) 
     begin
         case current_state is
+            when wait_ready =>
+                if ready = '1' then
+                    next_state <= Initialize;
+                else
+                    next_state <= wait_ready;
+                end if;
             when Initialize =>
                 next_state <= wait_btn;
             when wait_btn =>                    --Waits for button to be pressed
