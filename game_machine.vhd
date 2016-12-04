@@ -8,7 +8,8 @@ Port (  input : in STD_LOGIC_VECTOR(7 downto 0);    --Inputs from buttons
         q : in STD_LOGIC_VECTOR(3 downto 0);        --Data from the RAM
         addr : out STD_LOGIC_VECTOR(7 downto 0);    --Address in RAM to be looked at
         d : out STD_LOGIC_VECTOR(3 downto 0);       --Data begin written to RAM
-        we : out STD_LOGIC                          --Enables writing to RAM
+        we : out STD_LOGIC;                         --Enables writing to RAM
+        remKeys : out STD_LOGIC_VECTOR(2 downto 0)  --Output of remaining keys
      );
 end game_machine;
 
@@ -29,7 +30,8 @@ component board_dp
             winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;    --Flags depending on what object is present at current location
             we : out STD_LOGIC;                                         --Address in RAM to be looked at 
             d : out STD_LOGIC_VECTOR(3 downto 0);                       --Data begin written to RAM      
-            addr : out STD_LOGIC_VECTOR(7 downto 0)                     --Enables writing to RAM         
+            addr : out STD_LOGIC_VECTOR(7 downto 0);                    --Enables writing to RAM         
+            remKeys : out STD_LOGIC_VECTOR(2 downto 0)                  --Outputs remaining number of keys       
         );
 end component;
 
@@ -68,7 +70,7 @@ DP : board_dp port map(
     q => q,
     winF => winF, gateF => gateF, blockF => blockF, emptyF => emptyF,
     keyF => keyF, waterF => waterF, wallF => wallF, btnF => btnF, gotKeys => gotKeys,
-    we => we, d => d, addr => addr     
+    we => we, d => d, addr => addr, remKeys => remKeys     
 );
 
 --State machine component

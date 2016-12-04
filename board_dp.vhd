@@ -15,7 +15,8 @@ entity board_dp is
             winF, gateF, blockF, emptyF, keyF, waterF, wallF, btnF, gotKeys : out STD_LOGIC;    --Flags depending on what object is present at current location
             we : out STD_LOGIC;                                         --Address in RAM to be looked at 
             d : out STD_LOGIC_VECTOR(3 downto 0);                       --Data begin written to RAM      
-            addr : out STD_LOGIC_VECTOR(7 downto 0)                     --Enables writing to RAM         
+            addr : out STD_LOGIC_VECTOR(7 downto 0);                    --Enables writing to RAM
+            remKeys : out STD_LOGIC_VECTOR(2 downto 0)                  --Number of remainging keys to be displayed        
         );
 end board_dp;
 
@@ -36,7 +37,7 @@ architecture Behavioral of board_dp is
 
     --Movement controller component    
     component move_ctrl is
-        Port (  clr : in STD_LOGIC;
+        Port (  clr,clk : in STD_LOGIC;
                 chipLoc : in STD_LOGIC_VECTOR(7 downto 0);
                 input : in STD_LOGIC_VECTOR(7 downto 0);
                 nextLoc : out STD_LOGIC_VECTOR(7 downto 0);
@@ -57,9 +58,9 @@ architecture Behavioral of board_dp is
     --Looker Component    
     component looker is
     Port ( chipLoc, nextLoc, nextnextLoc : in STD_LOGIC_VECTOR(7 downto 0); --Corresponds to address help in registers
-           lookChip, lookNext, lookNextnext : in STD_LOGIC; --Which address will be looked at
-           addr : out STD_LOGIC_VECTOR(7 downto 0);
-           clr : in STD_LOGIC); --Address output to RAM
+           lookChip, lookNext, lookNextnext : in STD_LOGIC;                 --Which address will be looked at
+           addr : out STD_LOGIC_VECTOR(7 downto 0);                         --Address output to RAM
+           clr,clk : in STD_LOGIC); 
     end component;
 
     --Component which tells what object is at current location
@@ -84,18 +85,18 @@ architecture Behavioral of board_dp is
     signal chipLocQ, nextLocQ, nextnextLocQ : STD_LOGIC_VECTOR(7 downto 0); --outputs of address holding regs
     signal writerAddr, lookerAddr : STD_LOGIC_VECTOR(7 downto 0);           --Adresses to be MUXed which will be sent to RAM
     signal sAddr, weSig : STD_LOGIC;                                        --select signals for internal Mux processes
-    signal keyStart, remKeys : STD_LOGIC_VECTOR(2 downto 0);                --Starting number of keys, remaining number of keys
+    signal keyStart, remKeySig : STD_LOGIC_VECTOR(2 downto 0);                --Starting number of keys, remaining number of keys
     
     begin
     
     --signal assignments
-    gotKeys <= '1' when remKeys = "000" else '0';       --flag for when all keys have been collected
+    gotKeys <= '1' when remKeySig = "000" else '0';       --flag for when all keys have been collected
     sAddr <= weSig;                                     --Ties the select line of the MUX for writing addresses to we
     addr <= lookerAddr when sAddr = '0' else writerAddr;--MUX for address to be written to  
     chipLocD <= X"70" when sInitial = '1' else nextLocQ;--Assigning initial location to be loaded to chip register
     btnF <= '0' when input = X"0" else '1';             --Flag showing when a button has been pressed
     we <= weSig;
-    
+    remkeys <= remKeySig;
 --Port Map---------------------------------------------------------------------------------------------
     
     --Register holding chips location
@@ -126,6 +127,7 @@ architecture Behavioral of board_dp is
      );
      
      MOVER : move_ctrl port map (
+        clk => clk,
         clr => clr,
         input => input,
         chipLoc=> chipLocQ,
@@ -150,6 +152,7 @@ architecture Behavioral of board_dp is
      );
     
     L : looker port map (
+        clk => clk,
         clr => clr,
         chipLoc => chipLocQ,
         nextLoc => nextLocQ,
@@ -165,7 +168,7 @@ architecture Behavioral of board_dp is
         clk => clk,
         keyStart => "111",
         keyPLus => keyPlus,
-        remKeys => remKeys    
+        remKeys => remKeySig    
     );
     
 end Behavioral;

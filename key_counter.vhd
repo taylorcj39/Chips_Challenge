@@ -18,7 +18,7 @@ signal lock : STD_LOGIC := '0'; -- signal used to make sure the subtraction only
 
 begin 
 
-	process(clr, clk)
+	process(clr, clk, keyStart)
 	begin
 		if clr = '1' then 
 			count <= keyStart; -- set default key number back to count
