@@ -85,18 +85,19 @@ architecture Behavioral of board_dp is
     signal chipLocQ, nextLocQ, nextnextLocQ : STD_LOGIC_VECTOR(7 downto 0); --outputs of address holding regs
     signal writerAddr, lookerAddr : STD_LOGIC_VECTOR(7 downto 0);           --Adresses to be MUXed which will be sent to RAM
     signal sAddr, weSig : STD_LOGIC;                                        --select signals for internal Mux processes
-    signal keyStart, remKeySig : STD_LOGIC_VECTOR(2 downto 0);                --Starting number of keys, remaining number of keys
-    
+    signal remKeySig : STD_LOGIC_VECTOR(2 downto 0);                --Starting number of keys, remaining number of keys
+    signal addrSig : STD_LOGIC_VECTOR(7 downto 0);
     begin
     
     --signal assignments
     gotKeys <= '1' when remKeySig = "000" else '0';       --flag for when all keys have been collected
     sAddr <= weSig;                                     --Ties the select line of the MUX for writing addresses to we
-    addr <= lookerAddr when sAddr = '0' else writerAddr;--MUX for address to be written to  
+    addrSig <= lookerAddr when sAddr = '0' else writerAddr;--MUX for address to be written to  
     chipLocD <= X"70" when sInitial = '1' else nextLocQ;--Assigning initial location to be loaded to chip register
     btnF <= '0' when input = X"0" else '1';             --Flag showing when a button has been pressed
     we <= weSig;
     remkeys <= remKeySig;
+    addr <= addrSig;
 --Port Map---------------------------------------------------------------------------------------------
     
     --Register holding chips location

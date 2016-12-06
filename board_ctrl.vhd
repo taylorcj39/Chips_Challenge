@@ -32,7 +32,7 @@ architecture Behavioral of board_ctrl is
     T : process(clk, clr)
     begin
         if clr = '1' then
-            current_state <= Initialize;
+            current_state <= wait_ready;
         elsif clk'event and clk = '1' then
                 current_state <= next_state;
         end if;

@@ -181,10 +181,20 @@ component Gate_32x32 IS
           q : in STD_LOGIC_VECTOR(3 downto 0);
           addr : out STD_LOGIC_VECTOR(7 downto 0);
           d : out STD_LOGIC_VECTOR(3 downto 0);
+          ready : in STD_LOGIC;
           we : out STD_LOGIC
        );
   end component;
-  --Signals for components to communicate
+  
+  component level1_rom
+  PORT (
+      clka : IN STD_LOGIC;
+      addra : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+      douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+    );
+  end component;
+  
+--Signals for components to communicate
 signal addrsig: STD_LOGIC_VECTOR(7 downto 0);
 signal doutsig: STD_LOGIC_VECTOR(3 downto 0);
 signal valuesig: STD_LOGIC_VECTOR(3 downto 0);
@@ -198,7 +208,7 @@ signal debouncesig: STD_LOGIC_VECTOR(7 downto 0);
 signal doutasig: STD_LOGIC_VECTOR(3 downto 0);
 signal addrasig: STD_LOGIC_VECTOR(7 downto 0);
 signal dinasig: STD_LOGIC_VECTOR(3 downto 0);
-signal weasig: STD_LOGIC_VECTOR(0 downto 0);
+signal weasig : STD_LOGIC_VECTOR(0 downto 0);
 signal inputsignal: STD_LOGIC_VECTOR(7 downto 0);
 signal clks: STD_LOGIC;
 signal clearsignal: STD_LOGIC;
@@ -206,9 +216,19 @@ signal countsignal: STD_LOGIC_VECTOR(7 downto 0);
 signal lock: STD_LOGIC;
 signal addrscore: STD_LOGIC_VECTOR(16 downto 0);
 
-
+signal romQ : STD_LOGIC_VECTOR(3 downto 0);
+signal loaderD, machineD : STD_LOGIC_VECTOR(3 downto 0);
+signal loaderAddr, machineAddr : STD_LOGIC_VECTOR(7 downto 0);
+signal ready, weLoad, weGM : STD_LOGIC;
+ 
 --Begin Port Mapping of Components
 begin
+
+weasig(0) <= weLoad when ready = '0' else weGM;
+dinasig <= loaderD when ready = '0' else machineD;
+addrasig <= loaderAddr when ready = '0' else machineAddr;
+
+--Display button presses on LED's
 ld(15 downto 8) <= debouncesig;
 
 clearsignal <= sw(15);
@@ -228,12 +248,29 @@ GM: game_machine port map(
     clk => mclk,
     clr => clearsignal,
     q => doutasig,
-    addr => addrasig,
-    d => dinasig,
-    we => weasig(0)
-
+    addr => machineAddr,
+    d => machineD,
+    ready => ready,
+    we => weGM
     );
-L1: level1_ram port map(
+
+L1 : level1_rom port map (
+    clka => mclk,
+    addra => loaderAddr,
+    douta => romQ
+    );
+    
+LL : lv_loader port map (
+    clr => clearsignal,
+    clk => mclk,
+    q => romQ,
+    ready => ready,
+    we => weLoad, 
+    d => loaderD,
+    addr => loaderAddr
+    );
+        
+RAM : level1_ram port map(
     clka => mclk,
     clkb => mclk,
     wea => weasig,
