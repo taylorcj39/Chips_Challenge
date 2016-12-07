@@ -170,7 +170,7 @@ component Gate_32x32 IS
 --  component level1test IS
 --    PORT (
 --      clka : IN STD_LOGIC;
---      addra : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+--      addra : IN STD_LOGIC_VECTOR(7 DOWNTO 0);    --Test file, contains most sprites in order to see if they worked properly
 --      douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
 --    );
 --  END component;
@@ -181,8 +181,9 @@ component Gate_32x32 IS
           q : in STD_LOGIC_VECTOR(3 downto 0);
           addr : out STD_LOGIC_VECTOR(7 downto 0);
           d : out STD_LOGIC_VECTOR(3 downto 0);
-          ready : in STD_LOGIC;
-          we : out STD_LOGIC
+          we : out STD_LOGIC;
+          remKeys : out STD_LOGIC_VECTOR(2 downto 0);
+          ready : in STD_LOGIC
        );
   end component;
   
@@ -215,6 +216,7 @@ signal clearsignal: STD_LOGIC;
 signal countsignal: STD_LOGIC_VECTOR(7 downto 0);
 signal lock: STD_LOGIC;
 signal addrscore: STD_LOGIC_VECTOR(16 downto 0);
+signal remkeys: STD_LOGIC_VECTOR(2 downto 0);
 
 signal romQ : STD_LOGIC_VECTOR(3 downto 0);
 signal loaderD, machineD : STD_LOGIC_VECTOR(3 downto 0);
@@ -225,11 +227,11 @@ signal ready, weLoad, weGM : STD_LOGIC;
 begin
 
 weasig(0) <= weLoad when ready = '0' else weGM;
-dinasig <= loaderD when ready = '0' else machineD;
+dinasig <= loaderD when ready = '0' else machineD;    --Used to mux the signals from the ram or the rom for clear states
 addrasig <= loaderAddr when ready = '0' else machineAddr;
 
 --Display button presses on LED's
-ld(15 downto 8) <= debouncesig;
+ld(15 downto 13) <= remkeys;
 
 clearsignal <= sw(15);
 C1: clkdiv port map (
@@ -250,21 +252,22 @@ GM: game_machine port map(
     q => doutasig,
     addr => machineAddr,
     d => machineD,
+    we => weGM,
     ready => ready,
-    we => weGM
+    remkeys => remkeys
     );
 
 L1 : level1_rom port map (
     clka => mclk,
-    addra => loaderAddr,
+    addra => loaderAddr,  -- Rom version of the map to be used in conjunction with the level loader component
     douta => romQ
     );
     
 LL : lv_loader port map (
     clr => clearsignal,
     clk => mclk,
-    q => romQ,
-    ready => ready,
+    q => romQ,        --Component meant to allow clearing of the board to alleviate the need to power off and on
+    ready => ready,   -- Could also be used to load multiple roms of different levels
     we => weLoad, 
     d => loaderD,
     addr => loaderAddr
