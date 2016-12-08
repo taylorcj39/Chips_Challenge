@@ -24,7 +24,7 @@ architecture Behavioral of Chiptest_top is
 --           clr : in STD_LOGIC
 --           );
 --end component;
---Debouncer for input
+--Debouncer for input, reduce multiple jumps
 component debounce4 is
     Port ( inp : in STD_LOGIC_VECTOR (7 downto 0);
            cclk : in STD_LOGIC;
@@ -50,27 +50,84 @@ component lv_loader is
 end component;
 
 --ROM Files
-component score_board160x480 IS
+component level1_rom
+  PORT (
+      clka : IN STD_LOGIC;
+      addra : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+      douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+    );
+  end component;
+  
+component score_board160x480 IS --Name for the color to the right side of the screen
   PORT (
     clka : IN STD_LOGIC;
     addra : IN STD_LOGIC_VECTOR(16 DOWNTO 0);
     douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
   );
 END component;
-component Empty_32x32 IS
+component Empty_32x32 IS -- empty block, blank space for chip
   PORT (
     clka : IN STD_LOGIC;
     addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
     douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
   );
 END component;
-component Chip_32x32 IS
+component Chip_32x32 IS --Avatar, used to move around the board
   PORT (
     clka : IN STD_LOGIC;
     addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
     douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
   );
 END component;
+component Wall_32x32 IS --Impassible block, boundary
+  PORT (
+    clka : IN STD_LOGIC;
+    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+  );
+END component;
+component Block_32x32 IS --Moveable block, move to water to create empty
+  PORT (
+    clka : IN STD_LOGIC;
+    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+  );
+END component;
+component Water_32x32 IS --Water, Hazard. Chip can't swim
+  PORT (
+    clka : IN STD_LOGIC;
+    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+  );
+END component;
+component Drown_32x32 IS --Chip has drowned, replaced with this rom file
+  PORT (
+    clka : IN STD_LOGIC;
+    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+  );
+END component;
+component Gate_32x32 IS --Gate that chip must pass by using all keys
+    PORT (
+      clka : IN STD_LOGIC;
+      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+    );
+  END component;
+  component Key_32x32 IS --Key used to open the gate to proceed
+    PORT (
+      clka : IN STD_LOGIC;
+      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+    );
+  END component;
+  component Win_32x32 IS --End game, if Chip makes it here, you win
+    PORT (
+      clka : IN STD_LOGIC;
+      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+    );
+  END component;
 --component blk_mem_gen_0 IS
 --  PORT (
 --    clka : IN STD_LOGIC;
@@ -78,7 +135,7 @@ END component;
 --    douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
 --  );
 --END component;
-    --Level Loaded in
+    --Level Loaded in, can be reloaded on level loader
 component level1_ram IS
   PORT (
     clka : IN STD_LOGIC;
@@ -109,7 +166,7 @@ component vga_cc is
            rom_addrscore : out STD_LOGIC_VECTOR(16 downto 0)
 	);
 end component;
-    -- Clk Divider for different speeds
+    -- Clk Divider for different speeds to debouncer and the vga components
 component clkdiv is
 	 port(
 		 mclk : in STD_LOGIC;
@@ -118,55 +175,7 @@ component clkdiv is
 		 clks : out STD_LOGIC
 	     );
 end component;
-component Wall_32x32 IS
-  PORT (
-    clka : IN STD_LOGIC;
-    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-  );
-END component;
-component Block_32x32 IS
-  PORT (
-    clka : IN STD_LOGIC;
-    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-  );
-END component;
-component Water_32x32 IS
-  PORT (
-    clka : IN STD_LOGIC;
-    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-  );
-END component;
-component Drown_32x32 IS
-  PORT (
-    clka : IN STD_LOGIC;
-    addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-  );
-END component;
-component Gate_32x32 IS
-    PORT (
-      clka : IN STD_LOGIC;
-      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-  END component;
-  component Key_32x32 IS
-    PORT (
-      clka : IN STD_LOGIC;
-      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-  END component;
-  component Win_32x32 IS
-    PORT (
-      clka : IN STD_LOGIC;
-      addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-      douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-  END component;
+
 --  component level1test IS
 --    PORT (
 --      clka : IN STD_LOGIC;
@@ -174,6 +183,7 @@ component Gate_32x32 IS
 --      douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
 --    );
 --  END component;
+
     --Contains the game code to be communicated with the RAM
   component game_machine is
   Port (  input : in STD_LOGIC_VECTOR(7 downto 0);
@@ -187,13 +197,6 @@ component Gate_32x32 IS
        );
   end component;
   
-  component level1_rom
-  PORT (
-      clka : IN STD_LOGIC;
-      addra : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-      douta : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
-    );
-  end component;
   
 --Signals for components to communicate
 signal addrsig: STD_LOGIC_VECTOR(7 downto 0);
@@ -233,18 +236,17 @@ addrasig <= loaderAddr when ready = '0' else machineAddr;
 --Display button presses on LED's
 ld(15 downto 13) <= remkeys;
 
+--Allows the game to be reset without the need for a cold boot
 clearsignal <= sw(15);
+
+--Port mapping
 C1: clkdiv port map (
 mclk => mclk,
 clr => clearsignal,
 clk250 => clksig,
 clks => clks
 );
-SB: score_board160x480 port map(
-    douta => Mscore,
-    addra => addrscore,
-    clka => clksig
-    );
+
 GM: game_machine port map(
     input => debouncesig,
     clk => mclk,
@@ -257,11 +259,6 @@ GM: game_machine port map(
     remkeys => remkeys
     );
 
-L1 : level1_rom port map (
-    clka => mclk,
-    addra => loaderAddr,  -- Rom version of the map to be used in conjunction with the level loader component
-    douta => romQ
-    );
     
 LL : lv_loader port map (
     clr => clearsignal,
@@ -297,7 +294,7 @@ process(clearsignal, mclk)
 		if clearsignal = '1' then 
 			countsignal <= X"00";
 			lock <= '0';
-		elsif mclk'event and mclk = '1' then
+		elsif mclk'event and mclk = '1' then     --used to increment how many times a button is pressed, for score keeping
 		      if debouncesig = "00000000" and lock = '1' then
 		          lock <= '0';
 		      elsif debouncesig > "00000000" and lock = '0' then
@@ -306,6 +303,7 @@ process(clearsignal, mclk)
 		      end if;
 		end if;
 	end process;
+	--How many times a button is pressed
     ld(7 downto 0) <= countsignal;
     
 --    process(clr, clk)
@@ -331,6 +329,11 @@ inputsignal <= "0000" & btn(3) & btn(4) & btn(0) & btn(2);
 --addra => addrsig,
 --douta => valuesig
 --);
+SB: score_board160x480 port map(
+    douta => Mscore,
+    addra => addrscore,
+    clka => clksig
+    );
 W3: Win_32x32 port map(
     clka => clksig,
     addra => emptysig,
@@ -376,6 +379,12 @@ clka => clksig,
 addra => emptysig,
 douta => Mwall
 );
+
+L1 : level1_rom port map (
+    clka => mclk,
+    addra => loaderAddr,  -- Rom version of the map to be used in conjunction with the level loader component
+    douta => romQ
+    );
 --R1: ramreader port map (
 --Address => addrsig,
 --qB => doutsig,

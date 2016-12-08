@@ -109,7 +109,7 @@ begin
     			red <= M(7 downto 5);
     			green <= M(4 downto 2);
     			blue <= M(1 downto 0);
-        end if;
+        end if;   --Turns on sprites if in the viewable area that we desired. Second statement for the right area of the screen
         if spriteonscore= '1' and vidon = '1' then
                 red <= Mscore(7 downto 5);
                 green <= Mscore(4 downto 2);
