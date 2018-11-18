@@ -9,7 +9,9 @@ Members:
 Chris Taylor
 Lawrence Arsanos
 Tyler Vanhevel
-Heather Danner
+
+Video
+https://youtu.be/Wb5OYBgwpTs
 
 Data ROM Encoding:
 Block Type	    Encoded Data Value
